@@ -5,11 +5,7 @@ public class Main {
 	
 	
 	public static void main(String[] args) throws Exception {
-		long b = 12;
-		long c = 6;
-		long a = 36;
-		a = b << 32 | c;
-		System.out.println(a+" "+b+" "+c);
+		
 		Hospital hospital = new Hospital();
 		hospital.initializeHospital();
 		
@@ -50,6 +46,6 @@ public class Main {
 			}
 			System.out.println();
 		}
-		
+		System.out.println(hospital.getPatients().size());
 	}
 }

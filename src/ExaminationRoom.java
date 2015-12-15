@@ -35,9 +35,14 @@ public class ExaminationRoom implements Comparable<ExaminationRoom>{
 			this.setOccupied(false);
 			this.setOccupyingDoctor(null);
 			this.setOccupyingPatient(null);
+			this.setRunning(false);
 			this.setWaitingPatients(new ArrayList<Patient>());
 		}
 	
+	@Override
+	public String toString(){
+		return Integer.toString(number);
+	}
 		
 	public ExaminationRoom(int number, boolean occupied, boolean running, Doctor occupyingDoctor, Patient occupyingPatient,
 			ArrayList<Patient> waitingPatients) {
@@ -97,6 +102,8 @@ public class ExaminationRoom implements Comparable<ExaminationRoom>{
 		this.waitingPatients = waitingPatients;
 	}
 
-	
+	public void addWaitingPatient(Patient patient){
+		waitingPatients.add(patient);
+	}
 	
 }

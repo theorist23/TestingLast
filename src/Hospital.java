@@ -3,25 +3,29 @@ import java.util.Collections;
 import java.util.GregorianCalendar;
 
 public class Hospital {
-private ArrayList<ExaminationRoom> examinationRooms;
+private static ArrayList<ExaminationRoom> examinationRooms;
 private ArrayList<Doctor> doctors;
+private ArrayList<Patient> patients;
 
 	
-	public void initializeHospital(){
+	public void initializeHospital() throws Exception{
 		// Initialize variables
 		
 		examinationRooms = new ArrayList<ExaminationRoom>();
 		doctors = new ArrayList<Doctor>();
+		patients = new ArrayList<Patient>();
 		
 		// Add some examination rooms
 		ExaminationRoom room100 = new ExaminationRoom(100);
 		ExaminationRoom room101 = new ExaminationRoom(101);
 		ExaminationRoom room102 = new ExaminationRoom(102);
 		ExaminationRoom room103 = new ExaminationRoom(103);
+		ExaminationRoom room104 = new ExaminationRoom(104);
 		examinationRooms.add(room100);
 		examinationRooms.add(room101);
 		examinationRooms.add(room102);
 		examinationRooms.add(room103);
+		examinationRooms.add(room104);
 		
 		// Add some doctors
 		doctors.add(new Doctor("Albus", "Dumbeldore", new GregorianCalendar(1860, 3, 12), Specialty.PED, room100));
@@ -31,10 +35,36 @@ private ArrayList<Doctor> doctors;
 		doctors.add(new Doctor("Hermione", "Granger", new GregorianCalendar(1988, 12, 10), Specialty.PSY, room102));
 		
 	
+		// Check in doctors
+		for (int i = 0; i < doctors.size(); i++) {
+			try {
+				checkInDoctor(doctors.get(i));
+			} catch (Exception e) {
+				System.out.print(e.getMessage() + " - ");
+				System.out.println("Couldn't check in doctor " + doctors.get(i).getFirstName() + " " + doctors.get(i).getLastName());
+			}
+		}
+		
+		// Add some patients
+		checkInPatient(new Patient("Mary", "Jane", new GregorianCalendar(1860, 3, 12), Specialty.CAR));
+		checkInPatient(new Patient("Sirius", "Black", new GregorianCalendar(1960, 3, 1), Specialty.PSY));
+		checkInPatient(new Patient("Tom Marvolo", "Riddle", new GregorianCalendar(1978, 1, 12), Specialty.ENT));
+		checkInPatient(new Patient("Draco", "Malfoy", new GregorianCalendar(1860, 3, 12), Specialty.ENT));
 	}
 	
+	public void addExaminationRoom(ExaminationRoom room) throws Exception{
+		String thisNumber = Integer.toString(room.getNumber());
+		for (int i = 0; i < examinationRooms.size(); i++) {
+			String roomNumber = Integer.toString(examinationRooms.get(i).getNumber());
+			if (thisNumber == roomNumber){
+				throw new Exception("Room number already in use!");
+			}
+		}
+		examinationRooms.add(room);
+	}
+
 	public void checkInDoctor(Doctor doctor) throws Exception{
-		ArrayList<ExaminationRoom> runningRooms = getRunningRooms();
+		
 		if (doctor.isCheckedIn()){
 			throw new Exception("Already checked in");
 		}
@@ -65,6 +95,7 @@ private ArrayList<Doctor> doctors;
 		// Occupy the examination room
 		examinationRoom.setRunning(true);
 		examinationRoom.setOccupyingDoctor(doctor);
+		examinationRoom.setWaitingPatients(new ArrayList<Patient>());
 		
 		// Update the doctor's variables
 		doctor.setCheckedIn(true);		
@@ -81,7 +112,7 @@ private ArrayList<Doctor> doctors;
 		for (int i = 0; i < runningRooms.size(); i++) {
 			ExaminationRoom room = runningRooms.get(i);
 			if (room.getOccupyingDoctor() == doctor){	
-				if (room.getOccupyingPatient().isCheckedIn()){
+				if (room.isOccupied() && room.getOccupyingPatient().isCheckedIn()){
 					checkOutPatient(room.getOccupyingPatient());
 				}
 				room.resetExaminationRoom();
@@ -100,14 +131,19 @@ private ArrayList<Doctor> doctors;
 			}
 		}
 		doctor.setCheckedIn(false);
+		doctors.remove(doctor);
 		
 	}
 
 	public void checkInPatient(Patient patient) throws Exception{
+		System.out.println(patient.getSpecialtyNeeded());
 		// TODO: check if there are available rooms
 		ArrayList<ExaminationRoom> runningRooms = getRunningRooms();
 		if (patient.isCheckedIn()){
 			throw new Exception("Patient already checked in!");
+		}
+		else if (!patients.contains(patient)){
+			patients.add(patient);
 		}
 		
 		// Find appropriate doctor
@@ -145,7 +181,7 @@ private ArrayList<Doctor> doctors;
 		else {
 			minRoom = Collections.min(runningRooms);
 		}
-		minRoom.getWaitingPatients().add(patient);
+		minRoom.addWaitingPatient(patient);
 		patient.setCheckedIn(true);
 		
 	}
@@ -169,6 +205,7 @@ private ArrayList<Doctor> doctors;
 		}
 		
 		patient.setCheckedIn(false);
+		patients.remove(patient);
 		
 	}
 	
@@ -179,6 +216,7 @@ private ArrayList<Doctor> doctors;
 			// If room is free, try to let a patient enter
 			if (room.isRunning() && !room.isOccupied() && room.getWaitingPatients().size() > 0){
 				room.setOccupyingPatient(room.getWaitingPatients().remove(0));
+				room.setOccupied(true);
 			}
 		}
 	}
@@ -198,7 +236,7 @@ private ArrayList<Doctor> doctors;
 	}
 
 	public void setExaminationRooms(ArrayList<ExaminationRoom> examinationRooms) {
-		this.examinationRooms = examinationRooms;
+		Hospital.examinationRooms = examinationRooms;
 	}
 
 	public ArrayList<Doctor> getDoctors() {
@@ -208,4 +246,13 @@ private ArrayList<Doctor> doctors;
 	public void setDoctors(ArrayList<Doctor> doctors) {
 		this.doctors = doctors;
 	}
+
+	public ArrayList<Patient> getPatients() {
+		return patients;
+	}
+
+	public void setPatients(ArrayList<Patient> patients) {
+		this.patients = patients;
+	}
+	
 }

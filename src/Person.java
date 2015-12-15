@@ -10,17 +10,15 @@ public class Person {
 		super();
 		this.firstName = firstName;
 		this.lastName = lastName;
-		if (gregorianCalendar.after(new GregorianCalendar())){
-			this.birthDate = gregorianCalendar;
-		}
-		else {
+		this.birthDate = gregorianCalendar;
+		if (!gregorianCalendar.after(GregorianCalendar.getInstance())){
 			new Exception("Birthyear cannot be in the future!");
 		}
 	}
 	
 	public int age() {
 		GregorianCalendar today = new GregorianCalendar();
-		int age = birthDate.get(GregorianCalendar.YEAR) - today.get(GregorianCalendar.YEAR);
+		int age =  today.get(GregorianCalendar.YEAR) - this.birthDate.get(GregorianCalendar.YEAR);
 		if (today.get(GregorianCalendar.DATE) < birthDate.get(GregorianCalendar.DATE)){
 			age--;
 		}
@@ -34,6 +32,10 @@ public class Person {
 		Character.toUpperCase(lastName.charAt(0));
 		return firstName + " " + lastName;
 		
+	}
+	@Override
+	public String toString(){
+		return getFullName();
 	}
 	
 	public String getFirstName() {
