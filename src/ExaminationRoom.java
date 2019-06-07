@@ -21,7 +21,6 @@ public class ExaminationRoom implements Comparable<ExaminationRoom>{
 			return 0;
 		}
 		
-		// Bug: ExaminationRoom defines equals(ExaminationRoom) method and uses Object.equals(Object)
 		public boolean equals(ExaminationRoom room){
 			if (this.getWaitingPatients().size() == room.getWaitingPatients().size()){
 				return true;

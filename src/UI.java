@@ -1,4 +1,5 @@
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
 
 import javafx.application.Application;
@@ -15,10 +16,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
-import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
@@ -32,8 +33,9 @@ public class UI extends Application{
 		launch(args);
 
 	}
-
-
+	
+	int forTesting = 1;
+	
 	public void createCheckOutPatientTab(Tab checkOutPatientTab, Hospital hospital){
 		GridPane checkOutPatientGrid = new GridPane();
 		checkOutPatientGrid.setAlignment(Pos.CENTER);
@@ -61,7 +63,6 @@ public class UI extends Application{
 					createCheckOutPatientTab(checkOutPatientTab, hospital);
 					
 				} catch (Exception e) {
-					// TODO: handle exception
 					e.printStackTrace();
 				}
 				
@@ -113,9 +114,7 @@ public class UI extends Application{
 			@Override
 			public void handle(ActionEvent event) {
 				try {
-					// TODO: bug
-					Patient patient;
-					System.out.println(patientSpecialtyNeededPicker.getValue());
+					
 					hospital.checkInPatient(new Patient(patientFirstNameTextField.getText(), patientLastNameTextField.getText(),
 							GregorianCalendar.from(patientBrithdatePicker.getValue().atStartOfDay().atZone(ZoneId.systemDefault())), 
 							patientSpecialtyNeededPicker.getValue()));
@@ -128,6 +127,7 @@ public class UI extends Application{
 					Scene scene = new Scene(new Group(text), 200, 75);
 					dialog.setScene(scene);
 					dialog.show();
+					
 		
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -150,14 +150,10 @@ public class UI extends Application{
 	
 	
 	public void createHospitalTab(Tab hospitalTab, Hospital hospital){
-		GridPane hospitalGrid = new GridPane();
-		hospitalGrid.setAlignment(Pos.CENTER);
-		hospitalGrid.setHgap(10);
-		hospitalGrid.setVgap(10);
-		hospitalGrid.setPadding(new Insets(25, 25, 25, 25));
+		BorderPane hospitalGrid = new BorderPane();
 		
-		Label runningRoomsLabel = new Label("Running rooms: ");
-		hospitalGrid.add(runningRoomsLabel, 0, 0);
+		
+		
 		TabPane runningRoomsTabPane = new TabPane();
 		
 		for (int i = 0; i < hospital.getRunningRooms().size(); i++) {
@@ -168,7 +164,7 @@ public class UI extends Application{
 			
 		}
 		
-		hospitalGrid.add(runningRoomsTabPane, 0, 1);
+		hospitalGrid.setCenter(runningRoomsTabPane);
 		for (int i = 0; i < runningRoomsTabPane.getTabs().size(); i++) {
 			
 			ExaminationRoom room = hospital.getRunningRooms().get(i);
@@ -331,17 +327,26 @@ public class UI extends Application{
 		overviewGrid.add(patientsLabel, 0, 0);
 		String patients = new String();
 		for (int i = 0; i < hospital.getPatients().size(); i++) {
-			patients += hospital.getPatients().get(i);
+			patients += Integer.toString(i+1) + ". " +  hospital.getPatients().get(i) + "\n";
 		}
 		Label patientsInfoLabel = new Label(patients);
-		overviewGrid.add(patientsInfoLabel, 1, 0);
+		overviewGrid.add(patientsInfoLabel, 1, 1);
+		
+		Label doctorsLabel = new Label("Doctors: ");
+		overviewGrid.add(doctorsLabel, 2, 0);
+		String doctors = new String();
+		for (int i = 0; i < hospital.getDoctors().size(); i++) {
+			doctors += Integer.toString(i+1) + ". " + hospital.getDoctors().get(i) + "\n";
+		}
+		Label doctorsInfoLabel = new Label(doctors);
+		overviewGrid.add(doctorsInfoLabel, 3, 1);
 		
 		overviewTab.setContent(overviewGrid);
 	}
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		Hospital hospital = new Hospital();
+		Hospital hospital = new Hospital(new ArrayList<Doctor>(), new ArrayList<Patient>());
 		hospital.initializeHospital();
 		
 		
@@ -408,6 +413,15 @@ public class UI extends Application{
 			        	else if (tabPane.getSelectionModel().getSelectedItem() == checkOutDoctorTab){
 			        		createCheckOutDoctorTab(checkOutDoctorTab, hospital);
 			        	}
+			        	else if(tabPane.getSelectionModel().getSelectedItem() == addPatientTab){
+			        		createAddPatientTab(addPatientTab, hospital);
+			        	}
+			        	else if (tabPane.getSelectionModel().getSelectedItem() == addDoctorTab){
+			        		createAddDoctorTab(addDoctorTab, hospital);
+			        	}
+			        	else if (tabPane.getSelectionModel().getSelectedItem() == overviewTab){
+			        		createOverviewTab(overviewTab, hospital);
+			        	}
 			            
 			        }
 			    }
@@ -417,7 +431,7 @@ public class UI extends Application{
 		
 		Group root = new Group();
 		root.getChildren().add(tabPane);
-		Scene scene = new Scene(root, 500, 275);
+		Scene scene = new Scene(root, 550, 275);
         primaryStage.setScene(scene);
 		primaryStage.show();		
 	}

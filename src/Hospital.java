@@ -2,12 +2,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 
+/* Contains methods for checking people in and out */
 public class Hospital {
-private static ArrayList<ExaminationRoom> examinationRooms;
+
 private ArrayList<Doctor> doctors;
 private ArrayList<Patient> patients;
 
-	
+public Hospital(ArrayList<Doctor> doctors, ArrayList<Patient> patients) {
+	super();
+	this.doctors = doctors;
+	this.patients = patients;
+}
+
+private static ArrayList<ExaminationRoom> examinationRooms;	
 	public void initializeHospital() throws Exception{
 		// Initialize variables
 		
@@ -30,8 +37,7 @@ private ArrayList<Patient> patients;
 		// Add some doctors
 		doctors.add(new Doctor("Albus", "Dumbeldore", new GregorianCalendar(1860, 3, 12), Specialty.PED, room100));
 		doctors.add(new Doctor("Severus", "Snape", new GregorianCalendar(1967, 6, 2), Specialty.GEN, room100));
-		doctors.add(new Doctor("Harry", "Potter", new GregorianCalendar(1986, 11, 1), Specialty.CAR, room101));
-		// BUG - bad month value
+		doctors.add(new Doctor("Harry", "Potter", new GregorianCalendar(1986, 11, 21), Specialty.CAR, room101));
 		doctors.add(new Doctor("Hermione", "Granger", new GregorianCalendar(1988, 12, 10), Specialty.PSY, room102));
 		
 	
@@ -50,6 +56,7 @@ private ArrayList<Patient> patients;
 		checkInPatient(new Patient("Sirius", "Black", new GregorianCalendar(1960, 3, 1), Specialty.PSY));
 		checkInPatient(new Patient("Tom Marvolo", "Riddle", new GregorianCalendar(1978, 1, 12), Specialty.ENT));
 		checkInPatient(new Patient("Draco", "Malfoy", new GregorianCalendar(1860, 3, 12), Specialty.ENT));
+		updateWaitingLists();
 	}
 	
 	public void addExaminationRoom(ExaminationRoom room) throws Exception{
@@ -71,8 +78,7 @@ private ArrayList<Patient> patients;
 		if (!doctors.contains(doctor)){
 			doctors.add(doctor);
 		}
-		
-		// BUG - False positive - possible null-pointer dereference
+
 		ExaminationRoom examinationRoom = null;
 		
 		if (doctor.getFavoriteRoom().isRunning()){
@@ -115,18 +121,14 @@ private ArrayList<Patient> patients;
 				if (room.isOccupied() && room.getOccupyingPatient().isCheckedIn()){
 					checkOutPatient(room.getOccupyingPatient());
 				}
-				room.resetExaminationRoom();
-				// Find room with shortest waiting list
 				
-				// TODO: what if empty list?
-				
-				
+				// Find room with shortest waiting list				
 				ExaminationRoom minRoom = Collections.min(runningRooms);
 			
 				// Add people to this list
-				// TODO: maybe divide between different rooms
-				minRoom.getWaitingPatients().addAll(room.getWaitingPatients());			
-				
+				minRoom.getWaitingPatients().addAll(room.getWaitingPatients());		
+				updateWaitingLists();
+				room.resetExaminationRoom();
 				break;
 			}
 		}
@@ -136,8 +138,6 @@ private ArrayList<Patient> patients;
 	}
 
 	public void checkInPatient(Patient patient) throws Exception{
-		System.out.println(patient.getSpecialtyNeeded());
-		// TODO: check if there are available rooms
 		ArrayList<ExaminationRoom> runningRooms = getRunningRooms();
 		if (patient.isCheckedIn()){
 			throw new Exception("Patient already checked in!");
@@ -206,6 +206,7 @@ private ArrayList<Patient> patients;
 		
 		patient.setCheckedIn(false);
 		patients.remove(patient);
+		updateWaitingLists();
 		
 	}
 	
